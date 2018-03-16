@@ -1,0 +1,7 @@
+% load exParams.mat  % This loads T and R
+%
+% P_rgb = R*P_depth+T % Use T and R in this way
+%
+% Note 1. The unit for T should be mm.
+% Note 2. P_depth is a 3D point w.r.t the IR camera frame, P_rgb is the same point w.r.t the RGB camera frame
+
