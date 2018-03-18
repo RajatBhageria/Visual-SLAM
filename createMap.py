@@ -77,7 +77,8 @@ def createMap(fileNumbe):
         #find the yaw and pitch angle of the lidar
         rpy = np.array(dataI['rpy']).T
         yawAngle = rpy[2]
-        #find the rotation matrix for this
+
+        #convert from the body frame to the global frame
         rotGlobal = rotzHomo(yawAngle,xPose,yPose)
         threeDPoints = np.vstack((rBody,np.zeros((1,rBody.shape[1]))))
         rGlobal = np.dot(rotGlobal,threeDPoints)
@@ -89,18 +90,24 @@ def createMap(fileNumbe):
         xis = np.ceil((xs0 - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
         yis = np.ceil((ys0 - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
 
-        #run getMapCellsFromRay to get points occupied and unoccipied
-        # cells = getMapCellsFromRay(xPose,yPose,xis,yis)
-        # occupiedCells = cells[0,:]
-        # freeCells = cells[1,:]
+        #run getMapCellsFromRay to get points that are unoccupied
+        cells = getMapCellsFromRay(xPose,yPose,xis,yis)
+        xsFree = np.int_(cells[0,:])
+        ysFree = np.int_(cells[1,:])
 
-        #add the data points to the map
-        indGood = np.logical_and(np.logical_and(np.logical_and((xis > 1), (yis > 1)), (xis < MAP['sizex'])), (yis < MAP['sizey']))
-        MAP['map'][xis[indGood], yis[indGood]] = 1
+        #find all the occupied cells
+        xsOcc = np.setdiff1d(xis,xsFree)
+        ysOcc = np.setdiff1d(yis,ysFree)
 
+        #increase log odds of unoccupied cells to the map with log odds
+        indGood = np.logical_and(np.logical_and(np.logical_and((xsFree > 1), (ysFree > 1)), (xsFree < MAP['sizex'])), (ysFree < MAP['sizey']))
+        logOddsStepIncrease = .5
+        MAP['map'][xsFree[indGood], ysFree[indGood]] = MAP['map'][xsFree[indGood], ysFree[indGood]] + logOddsStepIncrease
 
+        #decrease log odds of occupied cells
+        indGoodOcc = np.logical_and(np.logical_and(np.logical_and((xsOcc > 1), (ysOcc > 1)), (xsOcc < MAP['sizex'])), (ysOcc < MAP['sizey']))
+        MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] - logOddsStepIncrease
 
-    fig2 = plt.figure(2);
     plt.imshow(MAP['map'], cmap="hot");
     plt.show()
 
@@ -122,7 +129,6 @@ def roty(angle):
 
 
 def findIndexOfCloestTimeFrame(jointTimes, ts):
-    minDist = 1000000000
     idx = (np.abs(jointTimes - ts)).argmin()
     return idx
 
