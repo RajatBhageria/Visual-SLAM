@@ -8,7 +8,7 @@ import time
 
 # todo load mat
 #load train_lidar0.mat;
-dataIn = io.loadmat("train_lidar0.mat")
+dataIn = io.loadmat("../data/train_lidar1.mat")
 
 angles = np.array([np.arange(-135,135.25,0.25)*np.pi/180.]).T
 ranges = np.double(dataIn['lidar'][0][110]['scan'][0][0]).T
@@ -81,17 +81,19 @@ else:
 #plot original lidar points
 fig1 = plt.figure(1);
 plt.plot(xs0,ys0,'.k')
+plt.show()
 
 #plot map
 fig2 = plt.figure(2);
 plt.imshow(MAP['map'],cmap="hot");
+plt.show()
 
 #plot correlation
-fig3 = plt.figure(3)
-ax3 = fig3.gca(projection='3d')
-X, Y = np.meshgrid(np.arange(0,9), np.arange(0,9))
-ax3.plot_surface(X,Y,c,linewidth=0,cmap=plt.cm.jet, antialiased=False,rstride=1, cstride=1)
-plt.show()
+# fig3 = plt.figure(3)
+# ax3 = fig3.gca(projection='3d')
+# X, Y = np.meshgrid(np.arange(0,9), np.arange(0,9))
+# ax3.plot_surface(X,Y,c,linewidth=0,cmap=plt.cm.jet, antialiased=False,rstride=1, cstride=1)
+# plt.show()
 
 
 
