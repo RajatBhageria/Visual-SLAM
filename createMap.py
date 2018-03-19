@@ -31,7 +31,7 @@ def createMap(fileNumbe):
 
     MAP['map'] = np.zeros((MAP['sizex'], MAP['sizey']), dtype=np.int8)  # DATA TYPE: char or int8
 
-    for i in range(0,numTimeStamps):
+    for i in range(0,100):#numTimeStamps):
         #load the data for this timestamp
         dataI = lidarData[i]
 
@@ -106,7 +106,8 @@ def createMap(fileNumbe):
 
         #decrease log odds of occupied cells
         indGoodOcc = np.logical_and(np.logical_and(np.logical_and((xsOcc > 1), (ysOcc > 1)), (xsOcc < MAP['sizex'])), (ysOcc < MAP['sizey']))
-        MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] - logOddsStepIncrease
+        logOddsStepDecrease = .3
+        MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] - logOddsStepDecrease
 
     plt.imshow(MAP['map'], cmap="hot");
     plt.show()
