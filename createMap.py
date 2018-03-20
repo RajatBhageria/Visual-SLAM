@@ -3,8 +3,9 @@ import load_data as ld
 import math
 import matplotlib.pyplot as plt
 from MapUtils.MapUtils import getMapCellsFromRay
+from deadReckoning import deadReckoning
 
-def createMap(fileNumbe):
+def createMap(fileNumber):
     lidarFilename = 'data/train_lidar'+fileNumber
     jointFileName = 'data/train_joint'+fileNumber
     lidarData = ld.get_lidar(lidarFilename)
@@ -28,10 +29,11 @@ def createMap(fileNumbe):
     MAP['ymax'] = 20
     MAP['sizex'] = int(np.ceil((MAP['xmax'] - MAP['xmin']) / MAP['res'] + 1))  # cells
     MAP['sizey'] = int(np.ceil((MAP['ymax'] - MAP['ymin']) / MAP['res'] + 1))
+    MAP['map'] = np.zeros((MAP['sizex'], MAP['sizey']), dtype=np.double)  # DATA TYPE: char or int8
 
-    MAP['map'] = np.zeros((MAP['sizex'], MAP['sizey']), dtype=np.int8)  # DATA TYPE: char or int8
+    deadReckoningPoses = deadReckoning(fileNumber)
 
-    for i in range(0,100):#numTimeStamps):
+    for i in range(0,numTimeStamps,100):
         #load the data for this timestamp
         dataI = lidarData[i]
 
@@ -43,12 +45,11 @@ def createMap(fileNumbe):
 
         # take valid indices
         # indValid = np.logical_and((di < 30), (di > 0.1))
-        # print indValid.shape
         # theta = theta[indValid]
         # di = di[indValid]
 
         #find the position of the head at this time
-        rHead = np.vstack([di * np.sin(theta), di * np.cos(theta), np.zeros((1,1081))])
+        rHead = np.vstack([di * np.cos(theta), di * np.sin(theta), np.zeros((1,1081)),np.ones((1,1081))])
 
         #find the time stamp
         ts = dataI['t'][0][0]
@@ -61,28 +62,32 @@ def createMap(fileNumbe):
         headAngle = headAngles[1][idx]
 
         #find the position of the body at this time
-        dNeck = .15 + .33
-        dBody = .93
-        rotations = rotz(neckAngle)*roty(headAngle)
-        rBody = np.dot(rotations,(rHead+dNeck)) + dBody
+        dNeck = .15
+        rotNeck = rotzHomo(neckAngle,0,0,dNeck)
+        rotHead = rotyHomo(headAngle)
+        rBody = np.dot(np.dot(rotNeck,rotHead),rHead)
 
-        #remove the data of the lidar hitting the ground
-        rBody = rBody[:,rBody[2,:] >= 1E-4]
+        #get the dead recokoned poses
+        xPose = deadReckoningPoses[i][0]
+        yPose = deadReckoningPoses[i][1]
+        thetaPose = deadReckoningPoses[i][2]
 
-        #convert from body frame to the global frame
-        pose = np.array(dataI['pose']).T
-        xPose = pose[0][0]
-        yPose = pose[1][0]
+        # pose = np.array(dataI['pose']).T
+        # xPose = pose[0][0]
+        # yPose = pose[1][0]
+        # thetaPose = pose[2][0]
 
         #find the yaw and pitch angle of the lidar
         rpy = np.array(dataI['rpy']).T
         yawAngle = rpy[2]
 
         #convert from the body frame to the global frame
-        rotGlobal = rotzHomo(yawAngle,xPose,yPose)
-        threeDPoints = np.vstack((rBody,np.zeros((1,rBody.shape[1]))))
-        rGlobal = np.dot(rotGlobal,threeDPoints)
-        rGlobal = rGlobal[0:2,:]
+        dBody = .93 + .33
+        rotGlobal = rotzHomo(yawAngle,xPose,yPose,dBody)
+        rGlobal = np.dot(rotGlobal,rBody)
+
+        #remove the data of the lidar hitting the ground
+        rGlobal = rGlobal[:,(rGlobal[2,:] >= 1E-4)]
 
         #convert to cells
         xs0 = rGlobal[0,:]
@@ -90,43 +95,57 @@ def createMap(fileNumbe):
         xis = np.ceil((xs0 - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
         yis = np.ceil((ys0 - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
 
+        xPose = np.ceil((xPose - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
+        yPose = np.ceil((yPose - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
+
         #run getMapCellsFromRay to get points that are unoccupied
         cells = getMapCellsFromRay(xPose,yPose,xis,yis)
         xsFree = np.int_(cells[0,:])
         ysFree = np.int_(cells[1,:])
 
         #find all the occupied cells
-        xsOcc = np.setdiff1d(xis,xsFree)
-        ysOcc = np.setdiff1d(yis,ysFree)
+        xsOcc = xis
+        ysOcc = yis
 
-        #increase log odds of unoccupied cells to the map with log odds
+        # # increase log odds of unoccupied cells to the map with log odds
         indGood = np.logical_and(np.logical_and(np.logical_and((xsFree > 1), (ysFree > 1)), (xsFree < MAP['sizex'])), (ysFree < MAP['sizey']))
-        logOddsStepIncrease = .5
-        MAP['map'][xsFree[indGood], ysFree[indGood]] = MAP['map'][xsFree[indGood], ysFree[indGood]] + logOddsStepIncrease
+        logOddsStepDecease = .01
+        MAP['map'][xsFree[indGood], ysFree[indGood]] = MAP['map'][xsFree[indGood], ysFree[indGood]] - logOddsStepDecease
 
         #decrease log odds of occupied cells
         indGoodOcc = np.logical_and(np.logical_and(np.logical_and((xsOcc > 1), (ysOcc > 1)), (xsOcc < MAP['sizex'])), (ysOcc < MAP['sizey']))
-        logOddsStepDecrease = .3
-        MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] - logOddsStepDecrease
+        logOddsStepIncrease = .2
+        MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] + logOddsStepIncrease
 
+    #show the map
     plt.imshow(MAP['map'], cmap="hot");
+    posesX = np.ceil((deadReckoningPoses[:,0] - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
+    posesY = np.ceil((deadReckoningPoses[:,1] - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
+
+    #show the dead reckoned poses
+    plt.scatter(posesX,posesY)
     plt.show()
 
-def rotz(angle):
-    return np.vstack([[math.cos(angle), - math.sin(angle),0],
-            [math.sin(angle), math.cos(angle),0],
-            [0, 0 , 1]])
+# def rotz(angle):
+#     return np.vstack([[math.cos(angle), - math.sin(angle),0],
+#             [math.sin(angle), math.cos(angle),0],
+#             [0, 0 , 1]])
+# def roty(angle):
+#     return np.vstack([[math.cos(angle),0, math.sin(angle)],
+#             [0,            1,      0],
+#             [-math.sin(angle),0,math.cos(angle)]])
 
-def rotzHomo(angle,tx,ty):
+def rotzHomo(angle,tx,ty,tz):
     return np.vstack([[math.cos(angle), - math.sin(angle),0,tx],
                       [math.sin(angle), math.cos(angle),0,ty],
-                      [0, 0 , 1, 0],
+                      [0, 0 , 1, tz],
                       [0, 0, 0, 1]])
 
-def roty(angle):
-    return np.vstack([[math.cos(angle),0, math.sin(angle)],
-            [0,            1,      0],
-            [-math.sin(angle),0,math.cos(angle)]])
+def rotyHomo(angle):
+    return np.vstack([[math.cos(angle),0, math.sin(angle),0],
+            [0,            1,      0,0],
+            [-math.sin(angle),0,math.cos(angle),0],
+            [0, 0, 0, 1]])
 
 
 def findIndexOfCloestTimeFrame(jointTimes, ts):
