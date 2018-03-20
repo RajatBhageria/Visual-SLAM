@@ -3,7 +3,7 @@ import load_data as ld
 import matplotlib.pyplot as plt
 
 
-def deadReckoning(fileNumber):
+def deadReckoning(fileNumber,noise = np.zeros((3,1))):
     lidarFilename = 'data/train_lidar' + fileNumber
     lidarData = ld.get_lidar(lidarFilename)
 
@@ -47,10 +47,15 @@ def deadReckoning(fileNumber):
         xNew = xPlus[0]
         yNew = xPlus[1]
 
+        #add the noise
+        thetaPlus = thetaPlus + noise[2,0]
+        xPlus = xPlus + np.hstack((noise[0:2,0],0))
+
         #set thetaPlus equal to thetaMinus and
         thetaMinus = thetaPlus
         xMinus = xPlus
 
+        #return the allpts
         allPts[i,0] = xNew
         allPts[i,1] = yNew
         allPts[i,2] = thetaMinus

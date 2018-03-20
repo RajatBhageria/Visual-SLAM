@@ -107,14 +107,14 @@ def createMap(fileNumber):
         xsOcc = xis
         ysOcc = yis
 
-        # # increase log odds of unoccupied cells to the map with log odds
+        #increase log odds of unoccupied cells to the map with log odds
         indGood = np.logical_and(np.logical_and(np.logical_and((xsFree > 1), (ysFree > 1)), (xsFree < MAP['sizex'])), (ysFree < MAP['sizey']))
-        logOddsStepDecease = .01
+        logOddsStepDecease = .008
         MAP['map'][xsFree[indGood], ysFree[indGood]] = MAP['map'][xsFree[indGood], ysFree[indGood]] - logOddsStepDecease
 
         #decrease log odds of occupied cells
         indGoodOcc = np.logical_and(np.logical_and(np.logical_and((xsOcc > 1), (ysOcc > 1)), (xsOcc < MAP['sizex'])), (ysOcc < MAP['sizey']))
-        logOddsStepIncrease = .2
+        logOddsStepIncrease = .05
         MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] + logOddsStepIncrease
 
     #show the map
