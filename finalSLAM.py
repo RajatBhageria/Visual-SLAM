@@ -49,6 +49,9 @@ def finalSLAM(lidarFilepath,jointFilepath):
     fig = plt.figure()
     im = plt.imshow(MAP['map'], cmap="hot", animated=True)
 
+    #all predicted robot positions
+    finalPoses = np.zeros((numTimeStamps,2))
+
     for i in range(0,numTimeStamps-1):
         #load the data for this timestamp
         dataI = lidarData[i]
@@ -97,6 +100,10 @@ def finalSLAM(lidarFilepath,jointFilepath):
         #get the position of the best particles
         xPose = position[0]
         yPose = position[1]
+
+        #add the current prediction of x y to numTimeStepsx2 matrix to plot later
+        finalPoses[i][0] = xPose
+        finalPoses[i][1] = yPose
 
         #find the yaw and pitch angle of IMU rpy
         rpy = np.array(dataI['rpy']).T
@@ -183,20 +190,24 @@ def finalSLAM(lidarFilepath,jointFilepath):
         weights = weights / np.sum(weights)
 
         #resample the particles
-        # Neff = 1.0/np.sum(weights**2)
-        # Nthresh = 20
-        # if Neff < Nthresh:
-            #weights = (1.0 / numParticles) * np.ones((numParticles,))
+        Neff = 1.0/np.sum(weights**2)
+        Nthresh = 20
+        #do uniform sampling
+        if Neff < Nthresh:
+            weights = (1.0 / numParticles) * np.ones((numParticles,))
 
-        # show the map
-        # if i % 50 == 0:
-        #     plt.imshow(MAP['map'], cmap="hot")
-        #     plt.show()
+        #if you want to visualize progress happening
+        #print i
 
-        print i
-
-    #show the dead reckoned poses
+    #show the map
     plt.imshow(MAP['map'], cmap="hot")
+
+    #show the localized path
+    posesX = np.ceil((finalPoses[:,0] - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
+    posesY = np.ceil((finalPoses[:,1] - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
+    plt.scatter(posesX,posesY)
+
+    #show the plot
     plt.show()
 
 def rot(angle):

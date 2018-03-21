@@ -1,6 +1,11 @@
+SLAM:
+
 The entire SLAM program is in the finalSLAM.py file. To run it, you simply have to pass in the full filepath of the
 lidar scan data and the joint data. When it's done, it'll show the completed map. Please be patient though since the
 MapUtils functions were slow and thus with large scan data, this process can take up to an hour. To make sure it's working
 you can print out what iteration the program is on.
 
-To test, simply put the fileNames into the testSLAM.py file and then run the script.
+To test SLAM, simply put the fileNames into the testSLAM.py file and then run the script.
+
+Texture Mapping:
+
