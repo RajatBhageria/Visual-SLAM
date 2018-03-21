@@ -67,15 +67,20 @@ def createMap(fileNumber):
         rotHead = rotyHomo(headAngle)
         rBody = np.dot(np.dot(rotNeck,rotHead),rHead)
 
+        #get the body roll and pitch angles
+        rollBody = jointData['rpy'][0][i]
+        pitchBody = jointData['rpy'][1][i]
+
+        rotBodyRoll = rotxHomo(rollBody,0,0,0)
+        rotBodyPitch = rotyHomo(pitchBody)
+
+        #apply the body roll and pitch angles
+        rBody = np.dot(rotBodyPitch,np.dot(rotBodyRoll,rBody))
+
         #get the dead recokoned poses
         xPose = deadReckoningPoses[i][0]
         yPose = deadReckoningPoses[i][1]
         thetaPose = deadReckoningPoses[i][2]
-
-        # pose = np.array(dataI['pose']).T
-        # xPose = pose[0][0]
-        # yPose = pose[1][0]
-        # thetaPose = pose[2][0]
 
         #find the yaw and pitch angle of the lidar
         rpy = np.array(dataI['rpy']).T
@@ -148,10 +153,16 @@ def rotyHomo(angle):
             [0, 0, 0, 1]])
 
 
+def rotxHomo(angle,tx,ty,tz):
+    return np.vstack([[1,0,0,tx],
+                      [0,math.cos(angle), - math.sin(angle),ty],
+                      [0,math.sin(angle), math.cos(angle), tz],
+                      [0, 0, 0, 1]])
+
 def findIndexOfCloestTimeFrame(jointTimes, ts):
     idx = (np.abs(jointTimes - ts)).argmin()
     return idx
 
 if __name__ == "__main__":
-    fileNumber = '0'
+    fileNumber = '1'
     createMap(fileNumber)

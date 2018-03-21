@@ -6,11 +6,10 @@ from MapUtils.MapUtils import getMapCellsFromRay
 from deadReckoning import deadReckoning
 from MapUtils.MapUtils import mapCorrelation
 
-def finalSLAM(fileNumber):
-    lidarFilename = 'data/train_lidar'+fileNumber
-    jointFileName = 'data/train_joint'+fileNumber
-    lidarData = ld.get_lidar(lidarFilename)
-    jointData = ld.get_joint(jointFileName)
+def finalSLAM(lidarFilepath,jointFilepath):
+    #get the data
+    lidarData = ld.get_lidar(lidarFilepath)
+    jointData = ld.get_joint(jointFilepath)
 
     #find all the joint times
     allJointTimes = jointData['ts'][0]
@@ -41,7 +40,7 @@ def finalSLAM(fileNumber):
     theta = np.array([np.arange(-135, 135.25, 0.25) * np.pi / 180.])
 
     # number of particles
-    numParticles = 5
+    numParticles = 50
 
     # instantiate the particles
     particlePoses = np.zeros((numParticles, 3))
@@ -50,7 +49,7 @@ def finalSLAM(fileNumber):
     fig = plt.figure()
     im = plt.imshow(MAP['map'], cmap="hot", animated=True)
 
-    for i in range(0,3000):#numTimeStamps-1):
+    for i in range(0,numTimeStamps-1):
         #load the data for this timestamp
         dataI = lidarData[i]
 
@@ -81,6 +80,16 @@ def finalSLAM(fileNumber):
         rotHead = rotyHomo(headAngle)
         rBody = np.dot(np.dot(rotNeck,rotHead),rHead)
 
+        #get the body roll and pitch angles
+        rollBody = jointData['rpy'][0][i]
+        pitchBody = jointData['rpy'][1][i]
+
+        rotBodyRoll = rotxHomo(rollBody,0,0,0)
+        rotBodyPitch = rotyHomo(pitchBody)
+
+        #apply the body roll and pitch angles
+        rBody = np.dot(rotBodyPitch,np.dot(rotBodyRoll,rBody))
+
         #get the pose of the best particle p*
         indexOfBest = np.argmax(weights)
         position = particlePoses[indexOfBest,:]
@@ -88,9 +97,8 @@ def finalSLAM(fileNumber):
         #get the position of the best particles
         xPose = position[0]
         yPose = position[1]
-        thetaPose = position[2]
 
-        #find the yaw and pitch angle of the lidar
+        #find the yaw and pitch angle of IMU rpy
         rpy = np.array(dataI['rpy']).T
         yawAngle = rpy[2]
 
@@ -122,12 +130,12 @@ def finalSLAM(fileNumber):
 
         #increase log odds of unoccupied cells to the map with log odds
         indGood = np.logical_and(np.logical_and(np.logical_and((xsFree > 1), (ysFree > 1)), (xsFree < MAP['sizex'])), (ysFree < MAP['sizey']))
-        logOddsStepDecease = .008
+        logOddsStepDecease = 1#np.log(.8/.3)
         MAP['map'][xsFree[indGood], ysFree[indGood]] = MAP['map'][xsFree[indGood], ysFree[indGood]] - logOddsStepDecease
 
         #decrease log odds of occupied cells
         indGoodOcc = np.logical_and(np.logical_and(np.logical_and((xsOcc > 1), (ysOcc > 1)), (xsOcc < MAP['sizex'])), (ysOcc < MAP['sizey']))
-        logOddsStepIncrease = .05
+        logOddsStepIncrease = 3#np.log(.7/.2)#.05
         MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] = MAP['map'][xsOcc[indGoodOcc], ysOcc[indGoodOcc]] + logOddsStepIncrease
 
         #do localization prediction
@@ -161,8 +169,8 @@ def finalSLAM(fileNumber):
             y_range = np.arange(particleY-0.2, particleY + 0.2, 0.05)
 
             #get the correlation between window and the map
-            corr = mapCorrelation(MAP['map'], x_im, y_im, rGlobal[0:2,:], x_range,y_range)
-            maxCorr = np.max(corr)
+            corr = mapCorrelation(MAP['map'], x_im, y_im, rGlobal[0:3,:], x_range,y_range)
+            maxCorr = np.max(corr[:])
             oldWeight = weights[particleI]
 
             #get the new weight
@@ -174,12 +182,18 @@ def finalSLAM(fileNumber):
         #normalize the weights
         weights = weights / np.sum(weights)
 
-        #show the map
+        #resample the particles
+        # Neff = 1.0/np.sum(weights**2)
+        # Nthresh = 20
+        # if Neff < Nthresh:
+            #weights = (1.0 / numParticles) * np.ones((numParticles,))
+
+        # show the map
         # if i % 50 == 0:
         #     plt.imshow(MAP['map'], cmap="hot")
         #     plt.show()
 
-        #resample the particles
+        print i
 
     #show the dead reckoned poses
     plt.imshow(MAP['map'], cmap="hot")
@@ -195,6 +209,14 @@ def rotzHomo(angle,tx,ty,tz):
                       [math.sin(angle), math.cos(angle),0,ty],
                       [0, 0 , 1, tz],
                       [0, 0, 0, 1]])
+
+
+def rotxHomo(angle,tx,ty,tz):
+    return np.vstack([[1,0,0,tx],
+                      [0,math.cos(angle), - math.sin(angle),ty],
+                      [0,math.sin(angle), math.cos(angle), tz],
+                      [0, 0, 0, 1]])
+
 
 def rotyHomo(angle):
     return np.vstack([[math.cos(angle),0, math.sin(angle),0],
@@ -242,4 +264,6 @@ def deadReckoning(allParticles,currOdomPose,thetaOdom,nextOdomPose,nextThetaOdom
 
 if __name__ == "__main__":
     fileNumber = '0'
-    finalSLAM(fileNumber)
+    lidarFilename = 'data/train_lidar'+fileNumber
+    jointFileName = 'data/train_joint'+fileNumber
+    finalSLAM(lidarFilename,jointFileName)

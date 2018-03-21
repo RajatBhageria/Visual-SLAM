@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3ccfa1c7-cf02-4d4d-864e-4ab2dff80190" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/finalSLAM.py" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/MapUtils/MapUtils.py" afterPath="$PROJECT_DIR$/MapUtils/MapUtils.py" />
-      <change beforePath="$PROJECT_DIR$/SLAM.py" afterPath="$PROJECT_DIR$/SLAM.py" />
-      <change beforePath="$PROJECT_DIR$/docs/guidance_slam.pdf" afterPath="$PROJECT_DIR$/docs/guidance_slam.pdf" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/README" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/testSLAM.py" />
+      <change beforePath="$PROJECT_DIR$/createMap.py" afterPath="$PROJECT_DIR$/createMap.py" />
+      <change beforePath="$PROJECT_DIR$/finalSLAM.py" afterPath="$PROJECT_DIR$/finalSLAM.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -20,45 +19,11 @@
       <file leaf-file-name="createMap.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/createMap.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="212">
-              <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="77" selection-end-column="32" />
+            <state relative-caret-position="-848">
+              <caret line="89" column="25" lean-forward="true" selection-start-line="89" selection-start-column="25" selection-end-line="89" selection-end-column="25" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SLAM.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/SLAM.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="18" lean-forward="false" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MapUtils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/MapUtils/MapUtils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="603">
-              <caret line="42" column="28" lean-forward="true" selection-start-line="42" selection-start-column="28" selection-end-line="42" selection-end-column="28" />
-              <folding>
-                <element signature="e#66#84#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test_MapUtils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/MapUtils/test_MapUtils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="73" column="19" lean-forward="true" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -66,8 +31,8 @@
       <file leaf-file-name="finalSLAM.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/finalSLAM.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2728">
-              <caret line="245" column="0" lean-forward="true" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
+            <state relative-caret-position="135">
+              <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -75,14 +40,22 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="deadReckoning.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/deadReckoning.py">
+      <file leaf-file-name="testSLAM.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/testSLAM.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="202">
-              <caret line="67" column="0" lean-forward="false" selection-start-line="67" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="105">
+              <caret line="7" column="38" lean-forward="false" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="38" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="5" column="84" lean-forward="false" selection-start-line="5" selection-start-column="84" selection-end-line="5" selection-end-column="84" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -107,11 +80,13 @@
         <option value="$PROJECT_DIR$/MapUtils/__init__.py" />
         <option value="$PROJECT_DIR$/MapUtils/test_MapUtils.py" />
         <option value="$PROJECT_DIR$/createMapWithDeadReckoning.py" />
-        <option value="$PROJECT_DIR$/createMap.py" />
         <option value="$PROJECT_DIR$/deadReckoning.py" />
         <option value="$PROJECT_DIR$/SLAM.py" />
         <option value="$PROJECT_DIR$/MapUtils/MapUtils.py" />
+        <option value="$PROJECT_DIR$/createMap.py" />
         <option value="$PROJECT_DIR$/finalSLAM.py" />
+        <option value="$PROJECT_DIR$/testSLAM.py" />
+        <option value="$PROJECT_DIR$/README" />
       </list>
     </option>
   </component>
@@ -144,6 +119,11 @@
             <path>
               <item name="Visual-SLAM" type="b2602c69:ProjectViewProjectNode" />
               <item name="Visual-SLAM" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Visual-SLAM" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Visual-SLAM" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Visual-SLAM" type="b2602c69:ProjectViewProjectNode" />
@@ -296,8 +276,8 @@
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.finalSLAM" />
-        <item index="1" class="java.lang.String" itemvalue="Python.SLAM" />
-        <item index="2" class="java.lang.String" itemvalue="Python.createMap" />
+        <item index="1" class="java.lang.String" itemvalue="Python.createMap" />
+        <item index="2" class="java.lang.String" itemvalue="Python.SLAM" />
         <item index="3" class="java.lang.String" itemvalue="Python.deadReckoning" />
         <item index="4" class="java.lang.String" itemvalue="Python.bresenham2D" />
       </list>
@@ -355,7 +335,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="63" />
+      <option name="time" value="64" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -576,10 +556,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/SLAM.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="127">
+          <caret line="21" column="18" lean-forward="false" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MapUtils/MapUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="603">
+          <caret line="42" column="28" lean-forward="true" selection-start-line="42" selection-start-column="28" selection-end-line="42" selection-end-column="28" />
+          <folding>
+            <element signature="e#66#84#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MapUtils/test_MapUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="73" column="19" lean-forward="true" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/createMap.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="77" selection-end-column="32" />
+        <state relative-caret-position="-848">
+          <caret line="89" column="25" lean-forward="true" selection-start-line="89" selection-start-column="25" selection-end-line="89" selection-end-column="25" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -596,38 +604,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MapUtils/test_MapUtils.py">
+    <entry file="file://$PROJECT_DIR$/README">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="73" column="19" lean-forward="true" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
+        <state relative-caret-position="75">
+          <caret line="5" column="84" lean-forward="false" selection-start-line="5" selection-start-column="84" selection-end-line="5" selection-end-column="84" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MapUtils/MapUtils.py">
+    <entry file="file://$PROJECT_DIR$/testSLAM.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="603">
-          <caret line="42" column="28" lean-forward="true" selection-start-line="42" selection-start-column="28" selection-end-line="42" selection-end-column="28" />
-          <folding>
-            <element signature="e#66#84#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SLAM.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" column="18" lean-forward="false" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="105">
+          <caret line="7" column="38" lean-forward="false" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="38" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/finalSLAM.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2728">
-          <caret line="245" column="0" lean-forward="true" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
+        <state relative-caret-position="135">
+          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
