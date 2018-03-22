@@ -1,25 +1,55 @@
-
+import math
 import numpy as np
 import load_data as ld
-import math
+import cv2
 import matplotlib.pyplot as plt
-from MapUtils.MapUtils import getMapCellsFromRay
-from deadReckoning import deadReckoning
-from MapUtils.MapUtils import mapCorrelation
+import pickle
 
 def textureMap(lidarFilepath,jointFilepath,rgbFilename,depthFilename):
     #get the data
-    lidarData = ld.get_lidar(lidarFilepath)
-    jointData = ld.get_joint(jointFilepath)
+    # # lidarData = ld.get_lidar(lidarFilepath)
+    # # jointData = ld.get_joint(jointFilepath)
+    # #
+    # # # #find all the joint times
+    # # # allJointTimes = jointData['ts'][0]
+    #
+    # #find all the head angles from joint data
+    # headAngles = jointData['head_angles']
+    #
+    # #get the total number of timestamps
+    # numTimeStamps = len(lidarData)
 
-    #find all the joint times
-    allJointTimes = jointData['ts'][0]
+    #get the calibration data
+    rgbCalibFile = "train_rgb/cameraParam/IRcam_Calib_result.pkl"
+    depthCalibFile= "train_rgb/cameraParam/RGBcamera_Calib_result.pkl"
+    IRToRGBFile = "train_rgb/cameraParam/exParams.pkl"
+    with open(rgbCalibFile, 'rb') as handle:
+        rgbCalib = pickle.load(handle)
 
-    #find all the head angles from joint data
-    headAngles = jointData['head_angles']
+    with open(depthCalibFile, 'rb') as handle:
+        depthCalib = pickle.load(handle)
 
-    #get the total number of timestamps
-    numTimeStamps = len(lidarData)
+    #get the rgb calibration data
+    fRGB = rgbCalib['fc']
+    rgbPrincipalPoint = rgbCalib['cc']
+
+    #get the IR calibratin data
+    fIR = depthCalib['fc']
+    depthPrincipalPoint = rgbCalib['cc']
+
+    #get the transformation from IR to RGB
+    with open(IRToRGBFile, 'rb') as handle:
+        IRToRGBData = pickle.load(handle)
+
+    IRToRGBRotation = IRToRGBData['R']
+    IRToRGBTranslation = IRToRGBData['T']
+
+    #import the SLAM data
+    with open('allPoses.pickle', 'rb') as handle:
+        allPoses = pickle.load(handle)
+
+    with open('finalMap.pickle', 'rb') as handle:
+        finalMap = pickle.load(handle)
 
     #get the RGB data
     rgbData = ld.get_rgb(rgbFilename)
@@ -29,15 +59,84 @@ def textureMap(lidarFilepath,jointFilepath,rgbFilename,depthFilename):
     numImages = len(rgbData)
     for i in range(0,numImages):
         image = rgbData[i]['image'] #1920 x 1080 x 3
-        depth = depthData[i]['depth'] #412 x 512
+        depth = depthData[i]['depth']# 412 x 512
         time = rgbData[i]['t']
 
-        #find the closest slam data
+        #create a meshgrid of the depth to do the transformations
+        row = np.arange(0, depth.shape[0],1)
+        col = np.arange(0, depth.shape[1],1)
+        cols, rows = np.meshgrid(col, row)
+
+        #do the RGB and depth image alignment
+        #convert the IR data to 3Dpoints
+        xIR = rows*depth/fIR
+        yIR = cols*depth/fIR
+
+        #transform the IR data into the RGB image frame using the camera parameters
+        #
+
+        #transform the points in the image to 3D points
+
+        #find the rotations for head and yaw angles
+        #find the head angles of the closest times
+        neckAngle = rgbData[i]['head_angles'].T[0]
+        headAngle = rgbData[i]['head_angles'].T[1]
+
+        #find the position of the body at this time
+        dNeck = .07
+        rotNeck = rotzHomo(neckAngle,0,0,dNeck)
+        rotHead = rotyHomo(headAngle)
+        totalRotHead = np.dot(rotNeck,rotHead)
+
+        #find the closest timestep from the SLAM data
+        idx = findIndexOfCloestTimeFrame(allPoses[:,0],time)
+
+        #find the closest pose x,y position from the SLAM data
+        pose = allPoses[idx,:]
+        xPose = pose[1]
+        yPose = pose[2]
+        thetaPose = pose[3]
+
+        #convert to the global frame
+        dBody = .93 + .33
+        rotGlobal = rotzHomo(thetaPose, xPose, yPose, dBody)
+        totalRotation = np.dot(rotGlobal,totalRotHead)
+
+        #rotate the RGB image and the depth image to the global frame
+        rotatedImage = cv2.warpPerspective(image,totalRotMatrix,image.shape[0:2])
+        plt.imshow(rotatedImage)
+        plt.show()
+
+
+        #find the ground plane on the rotated data via RANSAC or via thresholding
+
+
+        #
 
 
 def findIndexOfCloestTimeFrame(jointTimes, ts):
     idx = (np.abs(jointTimes - ts)).argmin()
     return idx
+
+def rotzHomo(angle,tx,ty,tz):
+    return np.vstack([[math.cos(angle), - math.sin(angle),0,tx],
+                      [math.sin(angle), math.cos(angle),0,ty],
+                      [0, 0 , 1, tz],
+                      [0, 0, 0, 1]])
+
+
+def rotxHomo(angle,tx,ty,tz):
+    return np.vstack([[1,0,0,tx],
+                      [0,math.cos(angle), - math.sin(angle),ty],
+                      [0,math.sin(angle), math.cos(angle), tz],
+                      [0, 0, 0, 1]])
+
+
+def rotyHomo(angle):
+    return np.vstack([[math.cos(angle),0, math.sin(angle),0],
+            [0,            1,      0,0],
+            [-math.sin(angle),0,math.cos(angle),0],
+            [0, 0, 0, 1]])
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from MapUtils.MapUtils import getMapCellsFromRay
 from deadReckoning import deadReckoning
 from MapUtils.MapUtils import mapCorrelation
+import pickle
 
 def finalSLAM(lidarFilepath,jointFilepath):
     #get the data
@@ -40,7 +41,7 @@ def finalSLAM(lidarFilepath,jointFilepath):
     theta = np.array([np.arange(-135, 135.25, 0.25) * np.pi / 180.])
 
     # number of particles
-    numParticles = 50
+    numParticles = 10
 
     # instantiate the particles
     particlePoses = np.zeros((numParticles, 3))
@@ -50,7 +51,7 @@ def finalSLAM(lidarFilepath,jointFilepath):
     im = plt.imshow(MAP['map'], cmap="hot", animated=True)
 
     #all predicted robot positions
-    finalPoses = np.zeros((numTimeStamps,2))
+    finalPoses = np.zeros((numTimeStamps,4))
 
     for i in range(0,numTimeStamps-1):
         #load the data for this timestamp
@@ -100,10 +101,13 @@ def finalSLAM(lidarFilepath,jointFilepath):
         #get the position of the best particles
         xPose = position[0]
         yPose = position[1]
+        thetaPose = position[2]
 
         #add the current prediction of x y to numTimeStepsx2 matrix to plot later
-        finalPoses[i][0] = xPose
-        finalPoses[i][1] = yPose
+        finalPoses[i][0] = ts
+        finalPoses[i][1] = xPose
+        finalPoses[i][2] = yPose
+        finalPoses[i][3] = thetaPose
 
         #find the yaw and pitch angle of IMU rpy
         rpy = np.array(dataI['rpy']).T
@@ -203,12 +207,19 @@ def finalSLAM(lidarFilepath,jointFilepath):
     plt.imshow(MAP['map'], cmap="hot")
 
     #show the localized path
-    posesX = np.ceil((finalPoses[:,0] - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
-    posesY = np.ceil((finalPoses[:,1] - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
-    plt.scatter(posesX,posesY)
+    posesX = np.ceil((finalPoses[:,1] - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
+    posesY = np.ceil((finalPoses[:,2] - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
+    plt.scatter(posesX,posesY,s=1)
 
     #show the plot
     plt.show()
+
+    #save the poses and map as a pickle file
+    with open('allPoses.pickle', 'wb') as handle:
+        pickle.dump(finalPoses, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('finalMap.pickle', 'wb') as handle:
+        pickle.dump(MAP, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 def rot(angle):
     return np.vstack([[math.cos(angle), - math.sin(angle)],
@@ -264,7 +275,7 @@ def deadReckoning(allParticles,currOdomPose,thetaOdom,nextOdomPose,nextThetaOdom
         thetaPlus = thetaMinus + deltaTheta
 
         # add the noise
-        noise = np.random.normal(0, 1e-4, (3, 1))
+        noise = np.random.normal(0, 1e-2, (3, 1))
         thetaPlus = thetaPlus + noise[2, 0]
         xPlus = xPlus + noise[0:2,0]#np.hstack((noise[0:2, 0], 0))
 
