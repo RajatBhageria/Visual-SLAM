@@ -3,7 +3,7 @@ import load_data as ld
 import math
 import matplotlib.pyplot as plt
 from MapUtils.MapUtils import getMapCellsFromRay
-from deadReckoning import deadReckoning
+from deadReckoningOnly import deadReckoning
 
 def createMap(fileNumber):
     lidarFilename = 'data/train_lidar'+fileNumber

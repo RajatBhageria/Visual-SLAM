@@ -1,4 +1,4 @@
-from finalSLAM import finalSLAM
+from SLAM import finalSLAM
 
 #name of the testing filepath
 fileNumber = '0'

@@ -1,6 +1,6 @@
 SLAM:
 
-The entire SLAM program is in the finalSLAM.py file. To run it, you simply have to pass in the full filepath of the
+The entire SLAM program is in the SLAM.py file. To run it, you simply have to pass in the full filepath of the
 lidar scan data and the joint data. When it's done, it'll show the completed map. Please be patient though since the
 MapUtils functions were slow and thus with large scan data, this process can take up to an hour. To make sure it's working
 you can print out what iteration the program is on.
@@ -9,3 +9,11 @@ To test SLAM, simply put the fileNames into the testSLAM.py file and then run th
 
 Texture Mapping:
 
+All the texture mapping is happening in the file textureMap.py. To test, run textTextureMap.py. Remember that you
+have to run SLAM before textureMap works (because running SLAM saves a map and poses pickle file that textureMap uses!
+I was very close to being done -- the only thing I was not able to figure
+out was how to actually paint the pixels in space since I've never used ROS.
+
+I've also included files that I used at the beginning before integrating into SLAM.py.
+* createMap.py that uses the odometry and dead reckoning to create the map
+* deadReckoningOnly.py that only does dead reckoning on raw odometry to test
