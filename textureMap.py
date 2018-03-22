@@ -6,19 +6,6 @@ import matplotlib.pyplot as plt
 import pickle
 
 def textureMap(lidarFilepath,jointFilepath,rgbFilename,depthFilename):
-    #get the data
-    # # lidarData = ld.get_lidar(lidarFilepath)
-    # # jointData = ld.get_joint(jointFilepath)
-    # #
-    # # # #find all the joint times
-    # # # allJointTimes = jointData['ts'][0]
-    #
-    # #find all the head angles from joint data
-    # headAngles = jointData['head_angles']
-    #
-    # #get the total number of timestamps
-    # numTimeStamps = len(lidarData)
-
     #get the calibration data
     rgbCalibFile = "train_rgb/cameraParam/IRcam_Calib_result.pkl"
     depthCalibFile= "train_rgb/cameraParam/RGBcamera_Calib_result.pkl"
@@ -31,11 +18,19 @@ def textureMap(lidarFilepath,jointFilepath,rgbFilename,depthFilename):
 
     #get the rgb calibration data
     fRGB = rgbCalib['fc']
+    fRGBy = fRGB[0]
+    fRGBx = fRGB[1]
     rgbPrincipalPoint = rgbCalib['cc']
+    rgbYPrincipalPoint = rgbPrincipalPoint[0]
+    rgbXPrincipalPoint = rgbPrincipalPoint[1]
 
     #get the IR calibratin data
     fIR = depthCalib['fc']
+    fIRy = fIR[0]
+    fIRx = fIR[1]
     depthPrincipalPoint = rgbCalib['cc']
+    depthYPrincipalPoint = depthPrincipalPoint[0]
+    depthXPrincipalPoint = depthPrincipalPoint[1]
 
     #get the transformation from IR to RGB
     with open(IRToRGBFile, 'rb') as handle:
@@ -69,13 +64,22 @@ def textureMap(lidarFilepath,jointFilepath,rgbFilename,depthFilename):
 
         #do the RGB and depth image alignment
         #convert the IR data to 3Dpoints
-        xIR = rows*depth/fIR
-        yIR = cols*depth/fIR
+        xIR = np.multiply(cols-depthXPrincipalPoint,depth)/fIRx
+        yIR = np.multiply(rows-depthYPrincipalPoint,depth)/fIRy
+
+        #convert image into X vector of all xyz locations
+        X = np.vstack((np.array(xIR).ravel(),np.array(yIR).ravel(),np.array(depth).ravel()))
 
         #transform the IR data into the RGB image frame using the camera parameters
-        #
+        XRGB = np.dot(IRToRGBRotation,X) + IRToRGBTranslation
 
         #transform the points in the image to 3D points
+        xRGB = XRGB[0,:]
+        yRGB = XRGB[1,:]
+        zRGB = XRGB[2,:]g
+
+        uRGB = fRGBy*xRGB/zRGB + rgbXPrincipalPoint
+        vRGB = fRGBx*yRGB/zRGB + rgbYPrincipalPoint
 
         #find the rotations for head and yaw angles
         #find the head angles of the closest times
