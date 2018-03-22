@@ -41,7 +41,7 @@ def SLAM(lidarFilepath,jointFilepath):
     theta = np.array([np.arange(-135, 135.25, 0.25) * np.pi / 180.])
 
     # number of particles
-    numParticles = 100
+    numParticles = 150
 
     # instantiate the particles
     particlePoses = np.zeros((numParticles, 3))
@@ -53,7 +53,7 @@ def SLAM(lidarFilepath,jointFilepath):
     #all predicted robot positions
     finalPoses = np.zeros((numTimeStamps,4))
 
-    stride = 500
+    stride = 300
 
     for i in range(0,numTimeStamps-stride,stride):
         #load the data for this timestamp
@@ -211,7 +211,7 @@ def SLAM(lidarFilepath,jointFilepath):
     #show the localized path
     posesX = np.ceil((finalPoses[:,1] - MAP['xmin']) / MAP['res']).astype(np.int16) - 1
     posesY = np.ceil((finalPoses[:,2] - MAP['ymin']) / MAP['res']).astype(np.int16) - 1
-    plt.scatter(posesX,posesY,s=1)
+    plt.scatter(posesX,posesY,s=2)
 
     #show the plot
     plt.show()

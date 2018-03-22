@@ -1,8 +1,7 @@
-from SLAM import finalSLAM
+from SLAM import SLAM
 
 #name of the testing filepath
-fileNumber = '0'
-lidarFilePath = 'data/train_lidar' + fileNumber
-jointFilePath = 'data/train_joint' + fileNumber
+lidarFilePath = 'test_data/test_lidar'
+jointFilePath = 'test_data/test_joint'
 
-finalSLAM(lidarFilePath,jointFilePath)
+SLAM(lidarFilePath,jointFilePath)
